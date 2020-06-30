@@ -1,0 +1,183 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/bootstrap.min.css">
+	<title>MovieScript</title>
+	<style type="text/css">
+		.navbar-brand {
+			font-size: 25px;
+			font-weight:bolder;		
+			font-family:sans-serif;	
+		}
+		.navbar-brand span{
+			font-size: 30px;
+			color:red;
+			font-family:serif;
+		}
+	</style>
+</head>
+<body>
+
+<nav class="sticky-top navbar navbar-expand-md navbar-dark bg-dark"> 
+<div class="container">
+	<a class="navbar-brand" href="#">
+	<span>M</span>ovie<span> S</span>cript
+	</a>
+	<button class="navbar-toggler" type="button" 
+	data-toggle="collapse" data-target="#navbarNavAltMarkup" 
+	aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+	 <span class="navbar-toggler-icon"></span> 
+ 	</button>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+
+	</div> 
+</div>
+</nav>
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="formModal"> 
+<div class="modal-dialog modal-lg modal-dialog-centered" role="document"> 
+<div class="modal-content"> 
+<div class="modal-header"> 
+<h5 class="modal-title">Detail of Film</h5> 
+<button type="button" class="close" data-dismiss="modal" aria-label="Close"> 
+<span aria-hidden="true">&times;</span> 
+</button> 
+</div> 
+<div class="modal-body "> 
+	...
+</div> 
+<div class="modal-footer"> 
+<button type="button" class="btn btn-secondary left" data-dismiss="modal">Close</button> 
+</div> 
+</div> 
+</div> 
+</div>
+
+
+<div class="container mt-5 justify-content-center">
+	<div class="row mt-5">
+		<div class="col-md-1"></div>
+		<div class="col-md-10 mt-3">
+<h3 class="text-center mb-3" >Search Movies</h3>
+			<div class="input-group">
+    	  <input type="text" class="form-control" 
+    	  placeholder="Search Movies here...." id="keyword" 
+    	  name="keyword" autocomplete="off">
+   	   <div class="input-group-append">
+      	<button class="btn btn-dark" type="button" id="search">
+         <i class="fa fa-search"></i>
+     	 </button>
+   	   </div>
+         </div>
+		</div>
+		<div class="col-md-1"></div>
+	</div> 
+	
+		<hr>
+	<div class="row" id="movie-list"></div>
+	
+</div>
+
+<footer class="bg-dark py-4 mt-4 text-center text-white" >
+      <span>Copyright &copy; <a href="https://github.com/ricky03knowhere" >ricky03knowhere</a> 2019</span>
+</footer>
+
+<script src="https://use.fontawesome.com/8b08d18fdc.js"></script>
+<script src="assets/jquery-3.3.1.js"></script>
+<script src="assets/bootstrap.min.js"></script>
+
+
+<script type="text/javascript">
+$("#search").on("click",function(){
+	
+	let keyword = $("#keyword").val()
+	
+	$.ajax({
+		url : "http://www.omdbapi.com?apikey=d65f434e&s="+keyword,
+		success : result => {
+			const movies = result.Search
+			let movie_list = ""
+			
+			if( result.Response == "True" ){
+				movies.forEach(m => {
+					movie_list += card(m)	
+				})
+				$("#movie-list").html(movie_list)
+			
+			}else{
+				$("#movie-list").html("<div class='alert alert-danger ml-5'><b>Movie Not Found...!!!</b></div>")
+			}
+			$(".detail").on("click",function(){
+			
+			const movie_id = $(this).data("id")
+
+			$.ajax({
+			url : "http://www.omdbapi.com?apikey=d65f434e&i="+movie_id,
+			success : cont => {
+
+			const modal_content = modal(cont)	
+			$(".modal-body").html(modal_content)
+			},
+			error : (e) => {
+			$(".modal-body").html(e.respondText)
+			}
+			})
+			})
+		},
+		error : (e) => {
+			$("#movie-list").html(e.respondText)
+		}
+		
+	})
+})
+
+
+function card(m){	
+	
+	return `<div class="col-md-4">
+		<div class="card mb-3">
+		<img class="card-img-top" width="70px" alt="Pictures not found" src="${m.Poster}">
+		<div class="card-body">
+		<h5 class="card-title">${m.Title}</h5>
+		<h6 class="card-subtitle mb-2 text-muted">${m.Year}</h6>
+		<a href="#" class="btn btn-primary detail" data-toggle="modal" 
+		data-target="#formModal" data-id="${m.imdbID}">Show Details</a>
+		</div>
+		</div>
+		</div>
+		`
+
+}
+
+function modal(m){
+
+	return `<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-6">
+		<img class="card-img-top" width="70px" alt="Pictures not found" src="${m.Poster}">
+		</div>
+		<div class="col-sm-6">
+		<ul class="list-group"> 
+		<li class="list-group-item"><h3>${m.Title} (${m.Year})</h3></li> 
+		<li class="list-group-item"><b>Rated :</b> ${m.Rated}</li> 
+		<li class="list-group-item"><b>Time :</b> ${m.Runtime}ute</li> 
+		<li class="list-group-item"><b>Genre :</b> ${m.Genre}</li> 
+		</ul>	
+		</div> 
+		</div>
+		<div class="row mt-3">
+		<div class="col-sm-6">
+		<li class="list-group-item"><b>Director :</b> ${m.Director}</li> 
+		<li class="list-group-item"><b>Actors :</b> ${m.Actors}</li> 
+		</div>
+		<div class="col-sm-6">
+		<li class="list-group-item"><b>Plot :</b> ${m.Plot}</li> 
+		</div>
+		</div>		
+		</div>`
+}
+
+</script>
+</body>
+</html>
